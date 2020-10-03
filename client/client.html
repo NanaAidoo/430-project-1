@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Workout Finder</title>
+    <link rel="stylesheet" type="text/css" href="/style.css">
+
+    <script>
+        const parseJSON = (xhr, content) => {
+            const nameField = nameForm.querySelector('#nameField').value;
+            console.log(nameField);
+            if (xhr.response && xhr.getResponseHeader('Content-Type') === 'application/json') {
+                const obj = JSON.parse(xhr.response);
+                console.dir(obj);
+
+               
+                if (obj.message) {
+                    content.innerHTML += `<p>${obj.message}</p>`;
+                }
+                if (obj.users) {
+                    for(let key in obj.users){
+                        content.innerHTML += `<fieldset>${JSON.stringify(obj.users[key])}</fieldset>`;
+                    }
+                }
+            }
+        };
+
+        const handleResponse = (xhr) => {
+            const content = document.querySelector('#content');
+
+            switch (xhr.status) {
+                case 200:
+                    content.innerHTML = '<b>Here are your search results!</b>';
+                    break;
+                case 201:
+                    content.innerHTML = '<b>Created!</b>';
+                    break;
+                case 204:
+                    content.innerHTML = '<b>Updated (No Content)</b>'
+                    break;
+                case 400:
+                    content.innerHTML = '<b>Bad Request :-(</b>';
+                    break;
+                case 404:
+                    content.innerHTML = '<b>Resource Not Found</b>';
+                    break;
+                default:
+                    content.innerHTML = '<b>Error code not implemented by client :-()</b>';
+                    break;
+            }
+            parseJSON(xhr, content);
+        };
+
+        const sendPost = (e, nameForm) => {
+            e.preventDefault();
+
+            const nameAction = nameForm.getAttribute('action');
+            const nameMethod = nameForm.getAttribute('method');
+
+            const nameField = nameForm.querySelector('#nameField');
+            const ageField = nameForm.querySelector('#ageField');
+            const dayField = nameForm.querySelector('#dayField');
+
+            const xhr = new XMLHttpRequest();
+            xhr.open(nameMethod, nameAction);
+
+            xhr.setRequestHeader('Accept', 'application/json');
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+            xhr.onload = () => handleResponse(xhr);
+
+            let days = dayField.querySelectorAll("input")
+
+            let formData = `name=${nameField.value}&age=${ageField.value}`;
+            for (i = 0; i < dayField.querySelectorAll("input").length; i++) {
+                formData += `&${days[i].id}=${days[i].value}`
+            }
+            xhr.send(formData);
+
+            return false;
+        };
+
+
+        const requestUpdate = (e, userForm) => {
+            e.preventDefault();
+            const url = '/getUsers';
+            const method = "get";
+
+            const xhr = new XMLHttpRequest();
+            xhr.open(method, url);
+            xhr.setRequestHeader('Accept', 'application/json');
+
+            if (method === 'get') {
+                xhr.onload = () => handleResponse(xhr, true);
+            } else {
+                xhr.onload = () => handleResponse(xhr, false);
+            }
+
+            xhr.send();
+
+            return false;
+        };
+
+        const init = () => {
+            const nameForm = document.querySelector('#nameForm');
+
+            const addUser = (e) => sendPost(e, nameForm);
+
+            nameForm.addEventListener('submit', addUser);
+
+            const userForm = document.querySelector('#userForm');
+
+            const getUser = (e) => requestUpdate(e, userForm);
+
+            userForm.addEventListener('submit', getUser);
+        };
+
+        window.onload = init;
+
+    </script>
+</head>
+
+<body>
+    <section id="top">
+        <h3>POST or GET your own workout</h3>
+        <form id="nameForm" action="/addUser" method="post">
+            <label for="name">Name: </label>
+            <input id="nameField" type="text" name="name" />
+            <label for="age">Age: </label>
+            <input id="ageField" type="number" name="age" min="0" max="100" step="1" />
+            <fieldset id="dayField">
+                <legend> Workout Days</legend>
+                <label for="monday">Monday: </label>
+                <input class="workout" id="monday" type="text" value="N/A"><br>
+                <label for="tuesday">Tuesday: </label>
+                <input class="workout" id="tuesday" type="text" value="N/A"><br>
+                <label for="wednesday">Wednesday: </label>
+                <input class="workout" id="wednesday" type="text" value="N/A"><br>
+                <label for="thursday">Thursday: </label>
+                <input class="workout" id="thursday" type="text" value="N/A"><br>
+                <label for="friday">Friday: </label>
+                <input class="workout" id="friday" type="text" value="N/A"><br>
+                <label for="saturday">Saturday: </label>
+                <input class="workout" id="saturday" type="text" value="N/A"><br>
+                <label for="sunday">Sunday: </label>
+                <input id="sunday" type="text" value="N/A"><br>
+            </fieldset>
+            <input type="submit" value="Add User" />
+        </form>
+        <form id="userForm" action="/getUsers" method="get">
+            <div id='checkField'>
+                <label for="monday">Monday: </label>
+                <input class="workout" type="checkbox" value="monday">
+                <label for="tuesday">Tuesday: </label>
+                <input class="workout" type="checkbox" value="tuesday">
+                <label for="wednesday">Wednesday: </label>
+                <input class="workout" type="checkbox" value="wednesday">
+                <label for="thursday">Thursday: </label>
+                <input class="workout" type="checkbox" value="thursday">
+                <label for="friday">Friday: </label>
+                <input class="workout" type="checkbox" value="friday">
+                <label for="saturday">Saturday: </label>
+                <input class="workout" type="checkbox" value="saturday">
+                <label for="sunday">Sunday: </label>
+                <input type="checkbox" value="sunday"><br>
+
+                <label for="age">Age: </label>
+                <input type="number" name="age" min="0" max="100" step="1" />
+            </div>
+            <input type="submit" value="Get User" />
+        </form>
+    </section>
+    <section id="content">
+    </section>
+</body>
+
+</html>
