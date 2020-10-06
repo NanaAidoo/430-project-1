@@ -7,24 +7,42 @@
 
     <script>
         const parseJSON = (xhr, content) => {
-            const nameField = nameForm.querySelector('#nameField').value;
+            const ageField = userForm.querySelector('#ageCheck');
+            const dayField = userForm.querySelectorAll('#checkField')
             console.log(nameField);
             if (xhr.response && xhr.getResponseHeader('Content-Type') === 'application/json') {
                 const obj = JSON.parse(xhr.response);
                 console.dir(obj);
 
-               
+
                 if (obj.message) {
                     content.innerHTML += `<p>${obj.message}</p>`;
                 }
                 if (obj.users) {
-                    for(let key in obj.users){
-                        content.innerHTML += `<fieldset>${JSON.stringify(obj.users[key])}</fieldset>`;
+                    for (let key in obj.users) {
+                        if (obj.users[key].age === ageField.value) {
+                            dayCheck(key);
+                            content.innerHTML += `<fieldset>${JSON.stringify(obj.users[key])}</fieldset>`;
+                        } else if (ageField.value === "") {
+                            content.innerHTML += `<fieldset>${JSON.stringify(obj.users[key])}</fieldset>`;
+                        }
                     }
                 }
             }
         };
-
+/*
+        function dayCheck(item, key) {
+            for (item in key) {
+                for (i = 0; i < dayField.length; i++) {
+                    if (dayField[i].checked) {
+                        if (dayField[i].value === item.name && item.value != "N/A"){
+                            content.innerHTML += `<fieldset>${JSON.stringify(key)}</fieldset>`;
+                        }
+                    }
+                }
+            }
+        }
+*/
         const handleResponse = (xhr) => {
             const content = document.querySelector('#content');
 
@@ -69,10 +87,10 @@
 
             xhr.onload = () => handleResponse(xhr);
 
-            let days = dayField.querySelectorAll("input")
+            let days = dayField.querySelectorAll("input");
 
             let formData = `name=${nameField.value}&age=${ageField.value}`;
-            for (i = 0; i < dayField.querySelectorAll("input").length; i++) {
+            for (i = 0; i < days.length; i++) {
                 formData += `&${days[i].id}=${days[i].value}`
             }
             xhr.send(formData);
@@ -165,7 +183,7 @@
                 <input type="checkbox" value="sunday"><br>
 
                 <label for="age">Age: </label>
-                <input type="number" name="age" min="0" max="100" step="1" />
+                <input id="ageCheck" type="number" name="age" min="0" max="100" step="1" />
             </div>
             <input type="submit" value="Get User" />
         </form>
