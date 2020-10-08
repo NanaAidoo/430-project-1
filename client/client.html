@@ -118,7 +118,7 @@
 
         const requestUpdate = (e, userForm) => {
             e.preventDefault();
-            const url = '/getUsers';
+            const url = '/getWorkouts';
             const method = "get";
 
             const xhr = new XMLHttpRequest();
@@ -182,7 +182,7 @@
             </fieldset>
             <input type="submit" value="Add User" />
         </form>
-        <form id="userForm" action="/getUsers" method="get">
+        <form id="userForm" action="/getWorkouts" method="get">
             <div id='checkField'>
                 <label for="monday">Monday: </label>
                 <input class="workout" type="checkbox" value="monday">

@@ -32,7 +32,7 @@ const handleGet = (request, response, parsedUrl) => {
     htmlHandler.getIndex(request, response);
   } else if (parsedUrl.pathname === '/style.css') {
     htmlHandler.getCSS(request, response);
-  } else if (parsedUrl.pathname === '/getUsers') {
+  } else if (parsedUrl.pathname === '/getWorkouts') {
     jsonHandler.getUsers(request, response);
   } else {
     jsonHandler.notReal(request, response);
@@ -40,7 +40,7 @@ const handleGet = (request, response, parsedUrl) => {
 };
 
 const handleHead = (request, response, parsedUrl) => {
-  if (parsedUrl.pathname === '/getUsers') {
+  if (parsedUrl.pathname === '/getWorkouts') {
     jsonHandler.getUsersMeta(request, response);
   } else {
     jsonHandler.notRealMeta(request, response);
