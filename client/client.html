@@ -8,8 +8,15 @@
     <script>
         const parseJSON = (xhr, content) => {
             const ageField = userForm.querySelector('#ageCheck');
-            const dayField = userForm.querySelectorAll('#checkField')
-            console.log(nameField);
+            const dayField = userForm.querySelectorAll('.workout');
+            let days = [];
+
+            for (i = 0; i < dayField.length; i++) {
+                if (dayField[i].checked) {
+                    days.push(dayField[i].value);
+                }
+            }
+            console.log(days);
             if (xhr.response && xhr.getResponseHeader('Content-Type') === 'application/json') {
                 const obj = JSON.parse(xhr.response);
                 console.dir(obj);
@@ -20,29 +27,37 @@
                 }
                 if (obj.users) {
                     for (let key in obj.users) {
-                        if (obj.users[key].age === ageField.value) {
-                            dayCheck(key);
-                            content.innerHTML += `<fieldset>${JSON.stringify(obj.users[key])}</fieldset>`;
+                        let users = obj.users[key];
+                        let userKeys = Object.keys(users);
+                        //console.log(userKeys);
+                        if (users.age === ageField.value) {
+                            console.log(key);
+                            dayCheck(days, users, userKeys);
+
+                            //content.innerHTML += `<fieldset>${JSON.stringify(users)}</fieldset>`;
                         } else if (ageField.value === "") {
-                            content.innerHTML += `<fieldset>${JSON.stringify(obj.users[key])}</fieldset>`;
+                            dayCheck(days, users, userKeys);
+                            //content.innerHTML += `<fieldset>${JSON.stringify(users)}</fieldset>`;
                         }
                     }
                 }
             }
         };
-/*
-        function dayCheck(item, key) {
-            for (item in key) {
-                for (i = 0; i < dayField.length; i++) {
-                    if (dayField[i].checked) {
-                        if (dayField[i].value === item.name && item.value != "N/A"){
-                            content.innerHTML += `<fieldset>${JSON.stringify(key)}</fieldset>`;
-                        }
+        //implement array include
+
+        function dayCheck(list, users, userKeys) {
+            if (list.length === 0) {
+                content.innerHTML += `<fieldset>${JSON.stringify(users)}</fieldset>`;
+            } else {
+                for (let k of userKeys) {
+                    if (list.includes(k)) {
+                        content.innerHTML += `<fieldset>${JSON.stringify(users)}</fieldset>`;
+                        break;
                     }
                 }
             }
         }
-*/
+
         const handleResponse = (xhr) => {
             const content = document.querySelector('#content');
 
@@ -54,7 +69,7 @@
                     content.innerHTML = '<b>Created!</b>';
                     break;
                 case 204:
-                    content.innerHTML = '<b>Updated (No Content)</b>'
+                    content.innerHTML = '<b>Workout has been Updated</b>'
                     break;
                 case 400:
                     content.innerHTML = '<b>Bad Request :-(</b>';
@@ -91,7 +106,9 @@
 
             let formData = `name=${nameField.value}&age=${ageField.value}`;
             for (i = 0; i < days.length; i++) {
-                formData += `&${days[i].id}=${days[i].value}`
+                if (days[i].value != "N/A" && days[i].value != "") {
+                    formData += `&${days[i].id}=${days[i].value}`
+                }
             }
             xhr.send(formData);
 
@@ -180,7 +197,7 @@
                 <label for="saturday">Saturday: </label>
                 <input class="workout" type="checkbox" value="saturday">
                 <label for="sunday">Sunday: </label>
-                <input type="checkbox" value="sunday"><br>
+                <input class="workout" type="checkbox" value="sunday"><br>
 
                 <label for="age">Age: </label>
                 <input id="ageCheck" type="number" name="age" min="0" max="100" step="1" />
