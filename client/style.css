@@ -1,21 +1,89 @@
-html, body {
-  height: 100%;
-  width: 100%;
-  margin: 0;
-  padding: 0;
+html,
+body {
+    width: 100%;
+    margin: 10px;
+    padding: 0;
+    background-color: lightgray;
 }
 
 #top {
-  text-align: center;
-  margin: 0 auto;
+    text-align: center;
+    margin: 0 auto;
+}
+#topsect{
+    background-color: darkgray;
 }
 
 #top h1 {
-  font-size: 2em;
+    font-size: 2em;
+}
+
+.post {
+    color:darkorange;
+}
+
+.button{
+    border: none;
+    font-size: 12px;
+    color:white;
+    background-color: darkgreen;
+}
+
+.button:hover{
+    color:white;
+    background-color: green;
+}
+
+.button:active{
+    color:white;
+    background-color: darkolivegreen;
+}
+
+#nameForm{
+    background-color: darkgray;
+}
+
+#nameForm fieldset {
+    border: none;
+    padding: 0;
+    background-color: darkgray;
+}
+
+legend{
+    background-color: darkgray;
+}
+
+#nameForm input {
+    border: none;
+    margin-bottom: .5em;
+}
+
+#userForm input{
+    border: none;
+    margin-bottom: .5em;
 }
 
 #content {
-  margin-top: 100px;
-  font-size: 2em;
-  text-align: center;
+    margin-top: 50px;
+    font-size: 1em;
+    text-align: center;
+}
+
+#content fieldset {
+    padding-top: 1em;
+    padding-right: 1em;
+    float: left;
+    background-color: green;
+    border: none;
+    margin-bottom: 50px;
+    margin-right: 20px;
+    box-shadow: 10px 10px 20px grey;
+}
+
+#content fieldset li{
+    margin-bottom: .3em;
+}
+
+ul {
+    text-align: left;
 }

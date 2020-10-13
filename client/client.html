@@ -6,6 +6,7 @@
     <link rel="stylesheet" type="text/css" href="/style.css">
 
     <script>
+        //parses the JSON data that was sent and adds it to the client side
         const parseJSON = (xhr, content) => {
             const ageField = userForm.querySelector('#ageCheck');
             const dayField = userForm.querySelectorAll('.workout');
@@ -16,7 +17,6 @@
                     days.push(dayField[i].value);
                 }
             }
-            console.log(days);
             if (xhr.response && xhr.getResponseHeader('Content-Type') === 'application/json') {
                 const obj = JSON.parse(xhr.response);
                 console.dir(obj);
@@ -28,62 +28,73 @@
                 if (obj.users) {
                     for (let key in obj.users) {
                         let users = obj.users[key];
-                        let userKeys = Object.keys(users);
-                        //console.log(userKeys);
+                        let userKeys = Object.keys(users.workout);
+                        //checks to see whether the age field has a value and if it does, if it matches any of each user's age
                         if (users.age === ageField.value) {
-                            console.log(key);
                             dayCheck(days, users, userKeys);
-
-                            //content.innerHTML += `<fieldset>${JSON.stringify(users)}</fieldset>`;
                         } else if (ageField.value === "") {
                             dayCheck(days, users, userKeys);
-                            //content.innerHTML += `<fieldset>${JSON.stringify(users)}</fieldset>`;
                         }
                     }
                 }
             }
         };
-        //implement array include
-
+        
+        //checks to see if any of the days in the user data is the same as the days that are checked in the client and adds whatever matches. if nothing is checked then it'll list anything by default
         function dayCheck(list, users, userKeys) {
+            let results = `<fieldset><h2>${JSON.parse(JSON.stringify(users.name))}</h2>
+                                                <div id=workouts>
+                                                <h3>Fitness Age: ${JSON.parse(JSON.stringify(users.age))}</h3><br>
+                                                <h4>Routine:<br>${JSON.parse(JSON.stringify(users.description))}</h4><br>
+                                                <ul id=${JSON.parse(JSON.stringify(users.name))}></ul>
+                                      </div></fieldset>`;
             if (list.length === 0) {
-                content.innerHTML += `<fieldset>${JSON.stringify(users)}</fieldset>`;
+                content.innerHTML += results;
+                for (let k of userKeys) {
+                    let daylist = document.querySelector(`#${JSON.parse(JSON.stringify(users.name))}`);
+                    daylist.innerHTML += `<li><b>${k}: ${JSON.parse(JSON.stringify(users.workout[k]))}</b></li>`;
+                }
             } else {
                 for (let k of userKeys) {
                     if (list.includes(k)) {
-                        content.innerHTML += `<fieldset>${JSON.stringify(users)}</fieldset>`;
-                        break;
+                        content.innerHTML += results;
+                        for (let w of userKeys) {
+                            let daylist = document.querySelector(`#${JSON.parse(JSON.stringify(users.name))}`);
+                            daylist.innerHTML += `<li><b>${w}: ${JSON.parse(JSON.stringify(users.workout[w]))}</b></li>`;
+                        }
                     }
+                    break;
                 }
             }
         }
 
+        //handles the responses and displays the string of whatever the matching status code is
         const handleResponse = (xhr) => {
             const content = document.querySelector('#content');
 
             switch (xhr.status) {
                 case 200:
-                    content.innerHTML = '<b>Here are your search results!</b>';
+                    content.innerHTML = '<h3>Here are your search results!</h3><br>';
                     break;
                 case 201:
-                    content.innerHTML = '<b>Created!</b>';
+                    content.innerHTML = '<h3>Your workout has been added!</h3>';
                     break;
                 case 204:
-                    content.innerHTML = '<b>Workout has been Updated</b>'
+                    content.innerHTML = '<h3>Workout has been Updated<h3>'
                     break;
                 case 400:
-                    content.innerHTML = '<b>Bad Request :-(</b>';
+                    content.innerHTML = '<h3>Your workout form is missing a component</h3>';
                     break;
                 case 404:
-                    content.innerHTML = '<b>Resource Not Found</b>';
+                    content.innerHTML = '<h3>Resource Not Found</h3>';
                     break;
                 default:
-                    content.innerHTML = '<b>Error code not implemented by client :-()</b>';
+                    content.innerHTML = '<h3>Error code not implemented by client :-()</h3>';
                     break;
             }
             parseJSON(xhr, content);
         };
-
+        //gets the data from each of the html fields and puts them in a string that is sent as an html request where it's turned into a JSON
         const sendPost = (e, nameForm) => {
             e.preventDefault();
 
@@ -93,6 +104,7 @@
             const nameField = nameForm.querySelector('#nameField');
             const ageField = nameForm.querySelector('#ageField');
             const dayField = nameForm.querySelector('#dayField');
+            const desField = nameForm.querySelector('#desField');
 
             const xhr = new XMLHttpRequest();
             xhr.open(nameMethod, nameAction);
@@ -104,7 +116,7 @@
 
             let days = dayField.querySelectorAll("input");
 
-            let formData = `name=${nameField.value}&age=${ageField.value}`;
+            let formData = `name=${nameField.value}&age=${ageField.value}&description=${desField.value}`;
             for (i = 0; i < days.length; i++) {
                 if (days[i].value != "N/A" && days[i].value != "") {
                     formData += `&${days[i].id}=${days[i].value}`
@@ -114,8 +126,8 @@
 
             return false;
         };
-
-
+        
+        //sends a get request using the data from the user form, where the filters are applied 
         const requestUpdate = (e, userForm) => {
             e.preventDefault();
             const url = '/getWorkouts';
@@ -135,7 +147,7 @@
 
             return false;
         };
-
+        //constants that initalized 
         const init = () => {
             const nameForm = document.querySelector('#nameForm');
 
@@ -148,8 +160,9 @@
             const getUser = (e) => requestUpdate(e, userForm);
 
             userForm.addEventListener('submit', getUser);
-        };
 
+        };
+        //calls the init function before the server is fully loaded
         window.onload = init;
 
     </script>
@@ -157,31 +170,40 @@
 
 <body>
     <section id="top">
-        <h3>POST or GET your own workout</h3>
-        <form id="nameForm" action="/addUser" method="post">
-            <label for="name">Name: </label>
-            <input id="nameField" type="text" name="name" />
-            <label for="age">Age: </label>
-            <input id="ageField" type="number" name="age" min="0" max="100" step="1" />
-            <fieldset id="dayField">
-                <legend> Workout Days</legend>
-                <label for="monday">Monday: </label>
-                <input class="workout" id="monday" type="text" value="N/A"><br>
-                <label for="tuesday">Tuesday: </label>
-                <input class="workout" id="tuesday" type="text" value="N/A"><br>
-                <label for="wednesday">Wednesday: </label>
-                <input class="workout" id="wednesday" type="text" value="N/A"><br>
-                <label for="thursday">Thursday: </label>
-                <input class="workout" id="thursday" type="text" value="N/A"><br>
-                <label for="friday">Friday: </label>
-                <input class="workout" id="friday" type="text" value="N/A"><br>
-                <label for="saturday">Saturday: </label>
-                <input class="workout" id="saturday" type="text" value="N/A"><br>
-                <label for="sunday">Sunday: </label>
-                <input id="sunday" type="text" value="N/A"><br>
-            </fieldset>
-            <input type="submit" value="Add User" />
-        </form>
+        <div id="topsect">
+            <h3>
+                <div class="post">POST</div> your workout routine
+            </h3>
+            <form id="nameForm" action="/addUser" method="post">
+                <label for="name">Name: </label>
+                <input id="nameField" type="text" name="name" />
+                <label for="age">Age: </label>
+                <input id="ageField" type="number" name="age" min="0" max="100" step="1" /><br>
+                <label for="description">Workout Title: </label>
+                <input id="desField" type="text" name="description" />
+                <fieldset id="dayField">
+                    <p> Workout Days</p>
+                    <label for="monday">Monday: </label>
+                    <input class="workout" id="monday" type="text" placeholder="N/A"><br>
+                    <label for="tuesday">Tuesday: </label>
+                    <input class="workout" id="tuesday" type="text" placeholder="N/A"><br>
+                    <label for="wednesday">Wednesday: </label>
+                    <input class="workout" id="wednesday" type="text" placeholder="N/A"><br>
+                    <label for="thursday">Thursday: </label>
+                    <input class="workout" id="thursday" type="text" placeholder="N/A"><br>
+                    <label for="friday">Friday: </label>
+                    <input class="workout" id="friday" type="text" placeholder="N/A"><br>
+                    <label for="saturday">Saturday: </label>
+                    <input class="workout" id="saturday" type="text" placeholder="N/A"><br>
+                    <label for="sunday">Sunday: </label>
+                    <input id="sunday" type="text" placeholder="N/A"><br>
+                </fieldset>
+                <input class="button" type="submit" value="Add User" />
+            </form>
+        </div>
+        <h3>
+            <div class="post">GET</div> another users workout that fits you
+        </h3>
         <form id="userForm" action="/getWorkouts" method="get">
             <div id='checkField'>
                 <label for="monday">Monday: </label>
@@ -202,11 +224,12 @@
                 <label for="age">Age: </label>
                 <input id="ageCheck" type="number" name="age" min="0" max="100" step="1" />
             </div>
-            <input type="submit" value="Get User" />
+            <input class="button" type="submit" value="Get User" />
         </form>
     </section>
     <section id="content">
     </section>
+    <footer></footer>
 </body>
 
 </html>
