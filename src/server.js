@@ -5,7 +5,7 @@ const htmlHandler = require('./htmlResponses.js');
 const jsonHandler = require('./jsonResponses.js');
 
 const port = process.env.PORT || process.env.NODE_PORT || 3000;
-//handles post request that are sent whenever add user is called
+// handles post request that are sent whenever add user is called
 const handlePost = (request, response, parsedUrl) => {
   if (parsedUrl.pathname === '/addUser') {
     const body = [];
@@ -26,7 +26,7 @@ const handlePost = (request, response, parsedUrl) => {
     });
   }
 };
-//handles get request that are sent and calls whatever method is used
+// handles get request that are sent and calls whatever method is used
 const handleGet = (request, response, parsedUrl) => {
   if (parsedUrl.pathname === '/') {
     htmlHandler.getIndex(request, response);
@@ -38,7 +38,7 @@ const handleGet = (request, response, parsedUrl) => {
     jsonHandler.notReal(request, response);
   }
 };
-//handles head request that and reads whatevver method was called
+// handles head request that and reads whatevver method was called
 const handleHead = (request, response, parsedUrl) => {
   if (parsedUrl.pathname === '/getWorkouts') {
     jsonHandler.getUsersMeta(request, response);
@@ -46,7 +46,7 @@ const handleHead = (request, response, parsedUrl) => {
     jsonHandler.notRealMeta(request, response);
   }
 };
-//on every request it reads the method and calls the appropriate method
+// on every request it reads the method and calls the appropriate method
 const onRequest = (request, response) => {
   const parsedUrl = url.parse(request.url);
 
@@ -58,7 +58,7 @@ const onRequest = (request, response) => {
     handleGet(request, response, parsedUrl);
   }
 };
-//creates a server
+// creates a server
 http.createServer(onRequest).listen(port);
 
 console.log(`Listening on 127.0.0.1: ${port}`);
